@@ -107,4 +107,4 @@ def attributes(label=None, kwargs=None, attributes=None, raw=None):
 
     if not result:
         return ''
-    return ' [%s]' % ' '.join(result)
+    return ' [%s]' % ', '.join(result)
