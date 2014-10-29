@@ -38,7 +38,9 @@ class Dot(files.File):
 
     _comment = '// %s'
     _subgraph = 'subgraph %s{'
-    _node = '\t%s%s'
+    _node = '\t%s%s;'
+    _multi_edge = '%s -> %s'
+    _multi_edges = '\t%s;'
     _tail = '}'
 
     quote = staticmethod(lang.quote)
@@ -74,7 +76,7 @@ class Dot(files.File):
             attr = getattr(self, '%s_attr' % kw)
             if attr:
                 styled = True
-                yield '\t%s%s' % (kw, self.attributes(None, attr))
+                yield '\t%s%s;' % (kw, self.attributes(None, attr))
 
         indent = '\t' * styled
         for line in self.body:
@@ -101,6 +103,18 @@ class Dot(files.File):
         edge = self._edge % (tail_name, head_name, attributes)
         self.body.append(edge)
 
+    def multi_edge(self, edges):
+        """Create an edge."""
+        edge = edges[0]
+        edges.pop(0)
+        for arg in edges:
+            edge = self._multi_edge % (edge, arg)
+        self.body.append(self._multi_edges % edge)
+    def two_edge(self, a, b, attributes=""):
+        """Create an edge."""
+        edge = self._two_edge % (a, b, attributes)
+        self.body.append(edge)
+
     def edges(self, tail_head_iter):
         """Create a bunch of edges."""
         edge = self._edge_plain
@@ -112,10 +126,14 @@ class Dot(files.File):
         """Add a graph/node/edge attribute statement."""
         if kw.lower() not in {'graph', 'node', 'edge'}:
             raise ValueError('attr statement must target graph, node, or edge: '
-                '%r' % kw)
+                             '%r' % kw)
         if _attributes or kwargs:
-            line = '\t%s%s' % (kw, self.attributes(None, kwargs, _attributes))
+            line = '\t%s%s;' % (kw, self.attributes(None, kwargs, _attributes))
             self.body.append(line)
+    def attribute(self, attribute, value):
+        """Add a graph attribute statement."""
+        line = '\t%s=%s;' % (attribute, value)
+        self.body.append(line)
 
     def subgraph(self, graph):
         """Add the current content of a graph as subgraph."""
@@ -130,13 +148,14 @@ class Graph(Dot):
     """Graph source code in the DOT language."""
 
     _head = 'graph %s{'
-    _edge = '\t\t%s -- %s%s'
-    _edge_plain = '\t\t%s -- %s'
+    _edge = '\t%s -- %s%s;'
+    _edge_plain = '\t%s -- %s;'
 
 
 class Digraph(Dot):
     """Directed graph source code in the DOT language."""
 
     _head = 'digraph %s{'
-    _edge = '\t\t%s -> %s%s'
-    _edge_plain = '\t\t%s -> %s'
+    _edge = '\t%s -> %s%s;'
+    _two_edge = '\t%s <-> %s%s;'
+    _edge_plain = '\t%s -> %s;'
