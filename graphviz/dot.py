@@ -110,10 +110,6 @@ class Dot(files.File):
         for arg in edges:
             edge = self._multi_edge % (edge, arg)
         self.body.append(self._multi_edges % edge)
-    def two_edge(self, a, b, attributes=""):
-        """Create an edge."""
-        edge = self._two_edge % (a, b, attributes)
-        self.body.append(edge)
 
     def edges(self, tail_head_iter):
         """Create a bunch of edges."""
@@ -132,7 +128,7 @@ class Dot(files.File):
             self.body.append(line)
     def attribute(self, attribute, value):
         """Add a graph attribute statement."""
-        line = '\t%s=%s;' % (attribute, value)
+        line = '\t%s="%s";' % (attribute, value)
         self.body.append(line)
 
     def subgraph(self, graph):
@@ -157,5 +153,4 @@ class Digraph(Dot):
 
     _head = 'digraph %s{'
     _edge = '\t%s -> %s%s;'
-    _two_edge = '\t%s <-> %s%s;'
     _edge_plain = '\t%s -> %s;'
